@@ -11,7 +11,6 @@ Major:
 - Updated license
 
 Minor:
-- Fixed nobs standard name modifier
 - Fixed timestamp format (added Z for UTC)
 - Fixed lat bounds attribute name (typo latg_name)
 - Renamed bnds -> bounds for better readability
@@ -316,7 +315,7 @@ class Clouds:
             attrs={
                 "cell_methods": "time: area: sum (interval: 15 minutes interval: 3 km)",
                 "long_name": "Number of Observations",
-                "standard_name": "cloud_area_fraction number_of_observations",
+                "standard_name": "number_of_observations",
                 "units": "1",
             },
         )
