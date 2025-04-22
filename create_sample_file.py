@@ -9,6 +9,7 @@ Major:
 - Added lineage attribute
 - Updated conventions/vocabulary versions
 - Updated license
+- Changed compression to float + significant_digits + zlib
 
 Minor:
 - Fixed timestamp format (added Z for UTC)
@@ -278,17 +279,12 @@ class Clouds:
             attrs={
                 "ancillary_variables": "nobs quality",
                 "cell_methods": "time: area: mean (interval: 15 minutes interval: 3 km)",
-                "comment": "rounded float + zlib compression is preferred over compression with scale factor and offset",
                 "long_name": "Daily Mean Cloud Fraction",
                 "standard_name": "cloud_area_fraction",
                 "units": "%",
             },
         )
-        cfc = cfc.where((cfc < 10) | (cfc > 20))
-
-        # Float type + rounding + internal compression is preferred over
-        # compression with scale factor and offset
-        return cfc.round(decimals=2)
+        return cfc.where((cfc < 10) | (cfc > 20))
 
     def _get_nobs(self):
         lon_min = self.lon.values.min()
@@ -392,7 +388,7 @@ class Radiation:
         return ds
 
 
-class DatasetWriter:
+class DataTreeWriter:
     def get_encoding(self):
         return {
             "/": {
@@ -428,7 +424,11 @@ class DatasetWriter:
             },
             "/clouds": {
                 "cfc_dm": {
+                    # Float type + significant digits + zlib compression
+                    # is preferred over compression with scale factor and offset
                     "dtype": "float32",
+                    "significant_digits": 2,
+                    "quantize_mode": "GranularBitRound",
                     "zlib": True,
                 },
                 "nobs": {"dtype": "uint8", "zlib": True},
@@ -457,6 +457,6 @@ if __name__ == "__main__":
         grid_resol=1.0,
         void_timestamps=[4, 20],
     )
-    writer = DatasetWriter()
+    writer = DataTreeWriter()
     tree = maker.get_data_tree()
     writer.write(tree, "test.nc")
