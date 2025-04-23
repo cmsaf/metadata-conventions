@@ -121,16 +121,21 @@ class DataTreeMaker:
         )
 
     def get_data_tree(self):
+        # Note: It would be nice to create coordinates only in the root group. However,
+        # xarray re-defines dimensions in each group which crashes tools like
+        # ncview. See https://github.com/pydata/xarray/issues/10241.
+        # In the meantime, repeat coordinates in each group.
+        coords = self.get_coords()
         tree = xr.DataTree.from_dict(
             {
-                "/": self.get_root(),
-                "/clouds": self.clouds.get_dataset(),
-                "/radiation": self.radiation.get_dataset(),
+                "/": xr.Dataset(attrs=self.get_global_attrs()),
+                "/clouds": xr.merge([self.clouds.get_dataset(), coords]),
+                "/radiation": xr.merge([self.radiation.get_dataset(), coords]),
             },
         )
         return tree
 
-    def get_root(self):
+    def get_coords(self):
         return xr.Dataset(
             {
                 "time_bounds": self.time_bounds,
@@ -143,7 +148,6 @@ class DataTreeMaker:
                 "lon": self.lon,
                 "lat": self.lat,
             },
-            attrs=self.get_global_attrs(),
         )
 
     def get_global_attrs(self):
@@ -224,7 +228,7 @@ class RecordStatus:
             rec_status,
             dims="time",
             attrs={
-                "comment": "Overall status of each record (timestamp) in this file. If a record is flagged as not ok, it is recommended not to use it.",
+                "comment": "Overall status of each record (timestamp) in this file/group. If a record is flagged as not ok, it is recommended not to use it.",
                 "flag_meanings": "ok void bad_quality",
                 "flag_values": np.array([0, 1, 2], dtype=rec_status.dtype),
                 "long_name": "Record Status",
@@ -390,45 +394,45 @@ class Radiation:
 
 class DataTreeWriter:
     def get_encoding(self):
-        return {
-            "/": {
-                "time": {
-                    "dtype": "float64",
-                    "units": "days since 2000-01-01 00:00:00",
-                    "calendar": "standard",
-                    "_FillValue": None,
-                },
-                "time_bounds": {
-                    "dtype": "float64",
-                    "_FillValue": None,
-                },
-                "lon": {
-                    "dtype": "float64",
-                    "_FillValue": None,
-                },
-                "lon_bounds": {
-                    "dtype": "float64",
-                    "_FillValue": None,
-                },
-                "lat": {
-                    "dtype": "float64",
-                    "_FillValue": None,
-                },
-                "lat_bounds": {
-                    "dtype": "float64",
-                    "_FillValue": None,
-                },
-                "record_status": {
-                    "dtype": "uint8",
-                },
+        common_enc = {
+            "time": {
+                "dtype": "float64",
+                "units": "days since 2000-01-01 00:00:00",
+                "calendar": "standard",
+                "_FillValue": None,
             },
+            "time_bounds": {
+                "dtype": "float64",
+                "_FillValue": None,
+            },
+            "lon": {
+                "dtype": "float64",
+                "_FillValue": None,
+            },
+            "lon_bounds": {
+                "dtype": "float64",
+                "_FillValue": None,
+            },
+            "lat": {
+                "dtype": "float64",
+                "_FillValue": None,
+            },
+            "lat_bounds": {
+                "dtype": "float64",
+                "_FillValue": None,
+            },
+            "record_status": {
+                "dtype": "uint8",
+            },
+        }
+        group_enc = {
             "/clouds": {
                 "cfc_dm": {
-                    # Float type + significant digits + zlib compression
-                    # is preferred over compression with scale factor and offset
+                    # Assuming CFC has an absolute physical precision of 0.01
+                    # (independent of the CFC value), quantize data with two
+                    # significant digits to improve compression.
+                    "least_significant_digit": 2,
                     "dtype": "float32",
-                    "significant_digits": 2,
-                    "quantize_mode": "GranularBitRound",
                     "zlib": True,
                 },
                 "nobs": {"dtype": "uint8", "zlib": True},
@@ -436,11 +440,20 @@ class DataTreeWriter:
             },
             "/radiation": {
                 "sdu": {
+                    # BitGroom quantization only makes sense if all data values
+                    # are in the same order of magnitude ([0, 1] here).
                     "dtype": "float32",
+                    "significant_digits": 2,
+                    "quantize_mode": "BitGroom",
                     "zlib": True,
                 },
             },
         }
+
+        # Repeat common encoding for each group
+        for group_name in group_enc:
+            group_enc[group_name] |= common_enc
+        return group_enc
 
     def write(self, data_tree, filename):
         data_tree.to_netcdf(filename, encoding=self.get_encoding())
