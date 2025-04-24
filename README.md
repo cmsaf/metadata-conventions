@@ -1,13 +1,15 @@
-# CM SAF Metadata Standard
+# CM SAF Metadata Conventions
 
-## Metadata Standard Document
+Metadata conventions for CM SAF products.
 
-The metadata standard document is located [here](metadata_standard.md)
+## Metadata Conventions Document
+
+The metadata conventions document is located [here](metadata_conventions.md)
 
 ## Sample File
 
 There's a sample file available for
-[download](https://public.cmsaf.dwd.de/data/perm/metadata_standard/cmsaf_cdop3_tcdr_sample.nc).
+[download](https://public.cmsaf.dwd.de/data/perm/metadata_standard/cmsaf_cdop4_tcdr_sample.nc).
 It was created by [this python script](examples/create_sample_file.py). 
 
 Note: Although the file contains groups, coordinates are repeated in each group.
