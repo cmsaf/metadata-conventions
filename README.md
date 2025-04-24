@@ -9,8 +9,8 @@ The metadata conventions document is located [here](conventions.md)
 ## Sample File
 
 There's a sample file available for
-[download](https://public.cmsaf.dwd.de/data/perm/metadata_standard/cmsaf_cdop4_tcdr_sample.nc).
-It was created by [this python script](examples/create_sample_file.py). 
+[download](https://public.cmsaf.dwd.de/data/perm/metadata_standard/cmsaf_cdop4_tcdr_sample.nc), 
+created by [this python script](examples/create_sample_file.py). 
 
 Note: Although the file contains groups, coordinates are repeated in each group.
 It would be nice to create coordinates only in the root group and inherit them

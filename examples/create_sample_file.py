@@ -19,9 +19,9 @@ Minor:
 """
 
 import datetime as dt
-import json
 
 import numpy as np
+import pyproj
 import xarray as xr
 from dateutil.rrule import DAILY, rrule
 from scipy.ndimage import rotate
@@ -120,20 +120,23 @@ class DataTreeMaker:
             lat_bounds, dims=("lat", "bounds"), attrs={"long_name": "Latitude bounds"}
         )
 
+    def get_grid_mapping(self):
+        crs = pyproj.CRS.from_epsg(4326)
+        return xr.DataArray(attrs=crs.to_cf())
+
     def get_data_tree(self):
         # Note: It would be nice to create coordinates only in the root group. However,
         # xarray re-defines dimensions in each group which crashes tools like
         # ncview. See https://github.com/pydata/xarray/issues/10241.
         # In the meantime, repeat coordinates in each group.
         coords = self.get_coords()
-        tree = xr.DataTree.from_dict(
+        return xr.DataTree.from_dict(
             {
                 "/": xr.Dataset(attrs=self.get_global_attrs()),
                 "/clouds": xr.merge([self.clouds.get_dataset(), coords]),
                 "/radiation": xr.merge([self.radiation.get_dataset(), coords]),
             },
         )
-        return tree
 
     def get_coords(self):
         return xr.Dataset(
@@ -142,6 +145,7 @@ class DataTreeMaker:
                 "lon_bounds": self.lon_bounds,
                 "lat_bounds": self.lat_bounds,
                 "record_status": self.rec_status.get_record_status(),
+                "latlon_grid": self.get_grid_mapping(),
             },
             coords={
                 "time": self.time,
@@ -152,12 +156,7 @@ class DataTreeMaker:
 
     def get_global_attrs(self):
         isoformat = "%Y-%m-%dT%H:%M:%SZ"
-        lineage = {
-            "MSG": "https://user.eumetsat.int/catalogue/EO:EUM:DAT:MSG:HRSEVIRI",
-            "GOES-I/N": "DOI:10.25921/Z9JQ-K976",
-            "GOES-R": "DOI:10.7289/V5BV7DSR",
-            "Himawari-8/9": "https://www.data.jma.go.jp/mscweb/en/himawari89/space_segment/sample_hisd.html",
-        }
+        lineage = "prov:wasDerivedFrom <https://user.eumetsat.int/catalogue/EO:EUM:DAT:MSG:HRSEVIRI>, <https://doi.org/10.24381/cds.bd0915c6>;"
         return {
             "Conventions": "CF-1.12, ACDD-1.3",
             "creator_email": "contact.cmsaf@dwd.de",
@@ -182,7 +181,7 @@ class DataTreeMaker:
             "keywords": "CLOUD PROPERTIES > CLOUD FRACTION, ATMOSPHERIC RADIATION > SUNSHINE",
             "keywords_vocabulary": "GCMD Science Keywords, Version 21.0",
             "license": "https://creativecommons.org/licenses/by/4.0/",
-            "lineage": json.dumps(lineage),
+            "lineage": lineage,
             "platform": "METEOSAT > METEOSAT-11, "
             "GOES > GOES-15, "
             "GOES > GOES-16, "
@@ -286,6 +285,7 @@ class Clouds:
                 "long_name": "Daily Mean Cloud Fraction",
                 "standard_name": "cloud_area_fraction",
                 "units": "%",
+                "grid_mapping": "latlon_grid",
             },
         )
         return cfc.where((cfc < 10) | (cfc > 20))
@@ -317,6 +317,7 @@ class Clouds:
                 "long_name": "Number of Observations",
                 "standard_name": "number_of_observations",
                 "units": "1",
+                "grid_mapping": "latlon_grid",
             },
         )
 
@@ -337,6 +338,7 @@ class Clouds:
                 "flag_meanings": "good medium bad",
                 "flag_values": np.array([0, 1, 2], qual.dtype),
                 "long_name": "Quality",
+                "grid_mapping": "latlon_grid",
             },
         )
 
@@ -375,6 +377,7 @@ class Radiation:
                 "long_name": "Sunshine Duration",
                 "standard_name": "duration_of_sunshine",
                 "units": "s",
+                "grid_mapping": "latlon_grid",
             },
         )
 
