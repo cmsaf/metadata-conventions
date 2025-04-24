@@ -4,7 +4,7 @@ Metadata conventions for CM SAF products.
 
 ## Metadata Conventions Document
 
-The metadata conventions document is located [here](metadata_conventions.md)
+The metadata conventions document is located [here](conventions.md)
 
 ## Sample File
 
