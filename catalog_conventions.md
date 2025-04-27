@@ -47,7 +47,7 @@ We're currently registering our datasets at DataCite, who require the metadata i
   <descriptions>
     <description xml:lang="en-us" descriptionType="Abstract">
       Detailed dataset description goes here. The degree character is not available, instead use:
-      My dataset is available on a 0.05&amp;#x00b0; x 0.05&amp;#x00b0; grid.
+      My dataset is available on a 0.05&#x00b0; x 0.05&#x00b0; grid.
     </description>
   </descriptions>
   <subjects>
