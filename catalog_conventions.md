@@ -14,37 +14,27 @@ The goal is to make our datasets Findable, Accessible, Interoperable and Re-usab
 
 The following metadata must be prepared before publishing a dataset.
 
-| Property             | Description                                                | DataCite Schema                                                                                                                                 | Comment                                      | Changelog     |
-|----------------------|------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|---------------|
-| Type                 | Resource type                                              | [ResourceType](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/resourcetype/) with resourceType="Dataset"                  | "grid"                                       |               |
-| Identifier           | Unique identifier for the dataset                          | [Identifier](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/identifier/)                                                  | DOI                                          |               |
-| Title                | Primary name of the dataset                                | [Title](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/title/)                                                            |                                              |               |
-| Description          | Detailed information about the dataset content and purpose | [Description](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/description/) with descriptionType="Abstract"                |                                              |               |
-| Measured Variables   | Geophysical variables provided by this dataset             | [Description](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/description/) with descriptionType="TechnicalInfo"           |                                              | New in CDOP-4 |
-| Keywords             | Keywords describing the dataset                            | [Subject](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/subject/)                                                        | GCMD Science Keywords                        | New in CDOP-4 |
-| Authors              | Individuals responsible for creating the dataset           | [Creator](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/creator/)                                                        |                                              |               |
-| Publisher            | Entity responsible for making the dataset available        | [Publisher](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/publisher/)                                                    |                                              |               |
-| Publication year     | Year when the dataset will be released                     | [PublicationYear](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/publicationyear/)                                        |                                              |               |
-| Version              | Version number                                             | [Version](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/version/)                                                        |                                              |               |
-| Size                 | The dataset's total volume, typically in GB or TB          | [Size](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/size/)                                                              |                                              |               |
-| File format          | Technical format of the dataset files (e.g. NetCDF)        | [Format](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/format/)                                                          |                                              |               |
-| Temporal coverage    | Time period covered by the dataset                         | [Date](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/date/)                                                              |                                              |               |
-| Spatial coverage     | Geographic area covered by the dataset                     | [GeoLocation](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/geolocation/)                                                |                                              |               |
-| Related publications | Publications that cite, document, or use the dataset       | [RelatedIdentifier](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/relatedidentifier/) with relationType="IsDocumentedBy" |                                              |               |
-| Previous versions    | Links to earlier versions of this dataset                  | [RelatedIdentifier](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/relatedidentifier/) with relationType="IsNewVersionOf" |                                              |               |
-| Input datasets       | Source datasets that were used to create this dataset      | [RelatedIdentifier](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/relatedidentifier/) with relationType="IsDerivedFrom"  |                                              |               |
-| License              | Dataset license                                            | [Rights](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/rights/)                                                          | https://creativecommons.org/licenses/by/4.0/ | New in CDOP-4 |
+| Property             | Description                                                | DataCite Schema                                                                                                                                 | Comment                                      | Changelog      |
+|----------------------|------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|----------------|
+| Type                 | Resource type                                              | [ResourceType](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/resourcetype/) with resourceType="Dataset"                  | "grid"                                       |                |
+| Identifier           | Unique identifier for the dataset                          | [Identifier](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/identifier/)                                                  | DOI                                          |                |
+| Title                | Primary name of the dataset                                | [Title](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/title/)                                                            |                                              |                |
+| Description          | Detailed information about the dataset content and purpose | [Description](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/description/)                                                |                                              |                |
+| Keywords             | Keywords describing the dataset                            | [Subject](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/subject/)                                                        | GCMD Science Keywords                        | New in CDOP-4  |
+| Authors              | Individuals responsible for creating the dataset           | [Creator](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/creator/)                                                        |                                              |                |
+| Publisher            | Entity responsible for making the dataset available        | [Publisher](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/publisher/)                                                    |                                              |                |
+| Publication year     | Year when the dataset will be released                     | [PublicationYear](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/publicationyear/)                                        |                                              |                |
+| Version              | Version number                                             | [Version](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/version/)                                                        |                                              |                |
+| Size                 | The dataset's total volume, typically in GB or TB          | [Size](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/size/)                                                              |                                              |                |
+| File format          | Technical format of the dataset files (e.g. NetCDF)        | [Format](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/format/)                                                          |                                              |                |
+| Temporal coverage    | Time period covered by the dataset                         | [Date](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/date/)                                                              |                                              |                |
+| Spatial coverage     | Geographic area covered by the dataset                     | [GeoLocation](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/geolocation/)                                                |                                              |                |
+| Related publications | Publications that cite, document, or use the dataset       | [RelatedIdentifier](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/relatedidentifier/) with relationType="IsDocumentedBy" |                                              |                |
+| Previous versions    | Links to earlier versions of this dataset                  | [RelatedIdentifier](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/relatedidentifier/) with relationType="IsNewVersionOf" |                                              |                |
+| Input datasets       | Source datasets that were used to create this dataset      | [RelatedIdentifier](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/relatedidentifier/) with relationType="IsDerivedFrom"  |                                              | New in CDOP-4  |
+| License              | Dataset license                                            | [Rights](https://datacite-metadata-schema.readthedocs.io/en/latest/properties/rights/)                                                          | https://creativecommons.org/licenses/by/4.0/ | New in CDOP-4  |
 
 We're currently registering our datasets at DataCite, who require the metadata in XML format. Here's an example
-
-
-
-TODO:
-
-- The XML example doesn't include "Measured Variables," "Keywords," or "License" which are marked as "New in CDOP-4"
-
-
-
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -60,6 +50,9 @@ TODO:
       My dataset is available on a 0.05&amp;#x00b0; x 0.05&amp;#x00b0; grid.
     </description>
   </descriptions>
+  <subjects>
+    <subject subjectScheme="GCMD Science Keywords, Version 8.6"> CLOUD PROPERTIES &gt; CLOUD FRACTION </subject>
+  </subjects>
   <creators>
     <creator>
       <creatorName>Meirink, Jan Fokke</creatorName>
@@ -103,5 +96,10 @@ TODO:
     <relatedIdentifier relatedIdentifierType="URL" relationType="IsDerivedFrom">https://user.eumetsat.int/catalogue/EO:EUM:DAT:MSG:HRSEVIRI</relatedIdentifier>
     <relatedIdentifier relatedIdentifierType="DOI" relationType="IsDerivedFrom">10.24381/cds.bd0915c6</relatedIdentifier>
   </relatedIdentifiers>
+  <rightsList>
+    <rights xml:lang="en" schemeURI="https://spdx.org/licenses/" rightsIdentifierScheme="SPDX" rightsIdentifier="CC-BY-4.0" rightsURI="https://creativecommons.org/licenses/by/4.0/">
+      Creative Commons Attribution 4.0 International
+    </rights>
+  </rightsList>
 </resource>
 ```
