@@ -9,7 +9,7 @@ The metadata conventions document is located [here](conventions.md)
 ## Sample File
 
 There's a sample file available for
-[download](https://public.cmsaf.dwd.de/data/perm/metadata_standard/cmsaf_cdop4_tcdr_sample.nc), 
+[download](https://public.cmsaf.dwd.de/data/perm/metadata_standard/TSTdm20200101000000120IMPGS01GL.nc), 
 created by [this python script](examples/create_sample_file.py). 
 
 Note: Although the file contains groups, coordinates are repeated in each group.
