@@ -11,6 +11,7 @@ CM SAF Metadata Conventions, Version 3 (CDOP-4), May 2025.
 - [Coordinates](#coordinates)
 - [Missing Records](#missing-records)
 - [Compression](#compression)
+- [Groups](#groups)
 
 ## Introduction
 
@@ -344,3 +345,59 @@ Round/truncate (1.123456, 1001.123456) to the given number of digits.
 BitGroom achieves the best compression, but only makes sense if the data range is small, because the truncation
 error increases for larger numbers. Files compressed with `least_significant_digits` are a bit larger,
 but the truncation error is much smaller.
+
+## Groups
+
+We recommend using
+[NetCDF groups](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.12/cf-conventions.html#groups)
+to organize the file's contents, if needed. Groups are helpful for storing the same set of variables in multiple
+configurations, such as day/night or low/high resolution. You can also inherit dimensions and coordinates.
+
+Flat file:
+
+```
+netcdf flat.nc {
+  dimensions:
+    time = 31;
+    lat = 180;
+    lon = 360;
+  variables:
+    float cfc_day(time, lat, lon) ;
+      cfc:long_name = "Mean Day Time Cloud Fraction" ;
+    float cfc_night(time, lat, lon) ;
+      cfc:long_name = "Mean Night Time Cloud Fraction" ;
+    float ctp_day(time, lat, lon) ;
+      cfc:long_name = "Mean Day Time Cloud Top Pressure" ;
+    float ctp_night(time, lat, lon) ;
+      cfc:long_name = "Mean Night Time Cloud Top Pressure" ;
+}
+```
+
+Dimensions defined globally, separate groups for day & night:
+
+```
+netcdf grouped.nc {
+  dimensions:
+    time = 31;
+    lat = 180;
+    lon = 360;
+  group: day {
+    variables:
+      float cfc(time, lat, lon) ;
+        cfc:long_name = "Mean Day Time Cloud Fraction" ;
+      float ctp(time, lat, lon) ;
+        cfc:long_name = "Mean Day Time Cloud Top Pressure" ;
+    attributes:
+      :title = "Day time means" ;
+  }
+  group: night {
+    variables:
+      float cfc(time, lat, lon) ;
+        cfc:long_name = "Mean Night Time Cloud Fraction" ;
+      float ctp(time, lat, lon) ;
+        cfc:long_name = "Mean Night Time Cloud Top Pressure" ;
+    attributes:
+      :title = "Night time means" ;
+  }
+}
+```
