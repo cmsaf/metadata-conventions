@@ -189,6 +189,7 @@ class DataTreeMaker:
             "platform_vocabulary": "GCMD Platforms, Version 21.0",
             "product_version": "1.0",
             "project": "Satellite Application Facility on Climate Monitoring (CM SAF)",
+            "provider_vocabulary": "GCMD Providers, Version 21.0",
             "references": "http://dx.doi.org/10.5676/EUM_SAF_CM/GERDA/V001",
             "source": "satellite",
             "standard_name_vocabulary": "Standard Name Table (v90, 20 March 2025)",
