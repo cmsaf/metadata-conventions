@@ -84,7 +84,7 @@ class DataTreeMaker:
             attrs={
                 "axis": "X",
                 "bounds": "lon_bounds",
-                "long_name": "Longitude",
+                "long_name": "longitude",
                 "standard_name": "longitude",
                 "units": "degrees_east",
             },
@@ -107,7 +107,7 @@ class DataTreeMaker:
             attrs={
                 "axis": "Y",
                 "bounds": "lat_bounds",
-                "long_name": "Latitude",
+                "long_name": "latitude",
                 "standard_name": "latitude",
                 "units": "degrees_north",
             },
@@ -123,7 +123,9 @@ class DataTreeMaker:
 
     def get_grid_mapping(self):
         crs = pyproj.CRS.from_epsg(4326)
-        return xr.DataArray(attrs=crs.to_cf())
+        attrs = crs.to_cf()
+        attrs["long_name"] = "Regular lat-lon grid"
+        return xr.DataArray(attrs=attrs)
 
     def get_data_tree(self):
         # Note: It would be nice to create coordinates only in the root group. However,
