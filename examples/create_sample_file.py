@@ -181,7 +181,7 @@ class DataTreeMaker:
             "AHI > Advanced Himawari Imager",
             "instrument_vocabulary": "GCMD Instruments, Version 21.0",
             "institution": "EUMETSAT/CMSAF",
-            "keywords": "CLOUD PROPERTIES > CLOUD FRACTION,ATMOSPHERIC RADIATION > SUNSHINE",
+            "keywords": "CLOUD PROPERTIES > CLOUD FRACTION,ATMOSPHERIC RADIATION > INCOMING SOLAR RADIATION",
             "keywords_vocabulary": "GCMD Science Keywords, Version 21.0",
             "license": "https://creativecommons.org/licenses/by/4.0/",
             "lineage": lineage,
@@ -196,6 +196,7 @@ class DataTreeMaker:
             "parameters derived from geostationary satellites. "
             "It is a climate data record covering the time period 2002-2024. "
             "Use cases include climate monitoring, climate model evaluation etc.",
+            "time_coverage_duration": "P1M",
             "time_coverage_end": self.time_bounds.max().dt.strftime(isoformat).item(),
             "time_coverage_resolution": "P1D",
             "time_coverage_start": self.time_bounds.min().dt.strftime(isoformat).item(),
@@ -258,16 +259,16 @@ class Clouds:
     def get_dataset(self):
         ds = xr.Dataset(
             {
-                "cfc_dm": self._get_cfc(),
+                "cfc": self._get_cfc(),
                 "nobs": self._get_nobs(),
                 "quality": self._get_quality(),
             },
             attrs={
                 "title": "Clouds",
-                "variable_id": "cfc_dm",
+                "variable_id": "cfc",
             },
         )
-        self.mask.mask_timestamps(ds, {"cfc_dm": np.nan, "nobs": 0})
+        self.mask.mask_timestamps(ds, {"cfc": np.nan, "nobs": 0})
         return ds
 
     def _get_cfc(self):
@@ -350,7 +351,7 @@ class Radiation:
         self.lat = lat
         self.mask = mask
 
-    def get_sdu(self):
+    def get_sis(self):
         heart_extent = 1.2
         ntimes, rows, cols = self.time.size, self.lat.size, self.lon.size
 
@@ -374,9 +375,10 @@ class Radiation:
             hearts,
             dims=("time", "lat", "lon"),
             attrs={
-                "long_name": "Sunshine Duration",
-                "standard_name": "duration_of_sunshine",
-                "units": "s",
+                "long_name": "Daily mean Surface Downwelling Shortwave Radiation",
+                "standard_name": "surface_downwelling_shortwave_flux_in_air",
+                "units": "W m-2",
+                "cell_methods": "time: area: mean (interval: 15 minutes interval: 3 km)",
                 "grid_mapping": "latlon_grid",
             },
         )
@@ -384,14 +386,14 @@ class Radiation:
     def get_dataset(self):
         ds = xr.Dataset(
             {
-                "sdu": self.get_sdu(),
+                "sis": self.get_sis(),
             },
             attrs={
                 "title": "Radiation",
-                "variable_id": "sdu",
+                "variable_id": "sis",
             },
         )
-        self.mask.mask_timestamps(ds, {"sdu": np.nan})
+        self.mask.mask_timestamps(ds, {"sis": np.nan})
         return ds
 
 
@@ -430,7 +432,7 @@ class DataTreeWriter:
         }
         group_enc = {
             "/clouds": {
-                "cfc_dm": {
+                "cfc": {
                     # Assuming CFC has an absolute physical precision of 0.01
                     # (independent of the CFC value), quantize data with two
                     # significant digits to improve compression.
@@ -442,7 +444,7 @@ class DataTreeWriter:
                 "quality": {"dtype": "uint8", "zlib": True},
             },
             "/radiation": {
-                "sdu": {
+                "sis": {
                     # BitGroom quantization only makes sense if all data values
                     # are in the same order of magnitude ([0, 1] here).
                     "dtype": "float32",
@@ -475,4 +477,4 @@ if __name__ == "__main__":
     )
     writer = DataTreeWriter()
     tree = maker.get_data_tree()
-    writer.write(tree, "test.nc")
+    writer.write(tree, "TSTdm20200101000000120IMPGS01GL.nc")
