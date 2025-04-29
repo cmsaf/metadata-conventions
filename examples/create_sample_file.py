@@ -185,7 +185,7 @@ class DataTreeMaker:
             "keywords_vocabulary": "GCMD Science Keywords, Version 21.0",
             "license": "https://creativecommons.org/licenses/by/4.0/",
             "lineage": lineage,
-            "platform": "METEOSAT > METEOSAT-11,GOES > GOES-15,GOES > GOES-16,Himawari > Himawari-8",
+            "platform": "Meteosat > METEOSAT-11,GOES-15 > Geostationary Operational Environmental Satellite 15,GOES-16 > Geostationary Operational Environmental Satellite 16,Himawari > Himawari-8",
             "platform_vocabulary": "GCMD Platforms, Version 21.0",
             "product_version": "1.0",
             "project": "Satellite Application Facility on Climate Monitoring (CM SAF)",
