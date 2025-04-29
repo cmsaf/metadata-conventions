@@ -9,6 +9,7 @@ Major:
 - Added lineage attribute
 - Updated conventions/vocabulary versions
 - Updated license
+- Added timezone to time units
 - Changed compression to float + significant_digits + zlib
 
 Minor:
@@ -400,7 +401,7 @@ class DataTreeWriter:
         common_enc = {
             "time": {
                 "dtype": "float64",
-                "units": "days since 2000-01-01 00:00:00",
+                "units": "days since 2000-01-01T00:00:00Z",
                 "calendar": "standard",
                 "_FillValue": None,
             },
