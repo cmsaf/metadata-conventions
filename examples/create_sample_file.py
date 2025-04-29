@@ -161,7 +161,7 @@ class DataTreeMaker:
         isoformat = "%Y-%m-%dT%H:%M:%SZ"
         lineage = "prov:wasDerivedFrom <https://user.eumetsat.int/catalogue/EO:EUM:DAT:MSG:HRSEVIRI>, <https://doi.org/10.24381/cds.bd0915c6>;"
         return {
-            "Conventions": "CF-1.12, ACDD-1.3",
+            "Conventions": "CF-1.12,ACDD-1.3",
             "creator_email": "contact.cmsaf@dwd.de",
             "creator_name": "DE/DWD",
             "creator_url": "http://www.cmsaf.eu/",
@@ -175,20 +175,17 @@ class DataTreeMaker:
             "geospatial_lon_resolution": "1 degree",
             "geospatial_lon_units": "degrees_east",
             "id": "DOI:10.5676/EUM_SAF_CM/GERDA/V001",
-            "instrument": "SEVIRI > Spinning Enhanced Visible and Infrared Imager, "
-            "GOES-15 Imager > Geostationary Operational Environmental Satellite 15-Imager, "
-            "ABI > Advanced Baseline Imager, "
+            "instrument": "SEVIRI > Spinning Enhanced Visible and Infrared Imager,"
+            "GOES-15 Imager > Geostationary Operational Environmental Satellite 15-Imager,"
+            "ABI > Advanced Baseline Imager,"
             "AHI > Advanced Himawari Imager",
             "instrument_vocabulary": "GCMD Instruments, Version 21.0",
             "institution": "EUMETSAT/CMSAF",
-            "keywords": "CLOUD PROPERTIES > CLOUD FRACTION, ATMOSPHERIC RADIATION > SUNSHINE",
+            "keywords": "CLOUD PROPERTIES > CLOUD FRACTION,ATMOSPHERIC RADIATION > SUNSHINE",
             "keywords_vocabulary": "GCMD Science Keywords, Version 21.0",
             "license": "https://creativecommons.org/licenses/by/4.0/",
             "lineage": lineage,
-            "platform": "METEOSAT > METEOSAT-11, "
-            "GOES > GOES-15, "
-            "GOES > GOES-16, "
-            "Himawari > Himawari-8",
+            "platform": "METEOSAT > METEOSAT-11,GOES > GOES-15,GOES > GOES-16,Himawari > Himawari-8",
             "platform_vocabulary": "GCMD Platforms, Version 21.0",
             "product_version": "1.0",
             "project": "Satellite Application Facility on Climate Monitoring (CM SAF)",
@@ -390,7 +387,7 @@ class Radiation:
                 "sdu": self.get_sdu(),
             },
             attrs={
-                "title": "Clouds",
+                "title": "Radiation",
                 "variable_id": "sdu",
             },
         )
