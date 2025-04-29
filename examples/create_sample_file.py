@@ -164,7 +164,7 @@ class DataTreeMaker:
             "Conventions": "CF-1.12,ACDD-1.3",
             "creator_email": "contact.cmsaf@dwd.de",
             "creator_name": "DE/DWD",
-            "creator_url": "http://www.cmsaf.eu/",
+            "creator_url": "https://cm-saf.eumetsat.int/",
             "date_created": dt.datetime.now().strftime(isoformat),
             "geospatial_lat_max": self.lat_bounds.max().item(),
             "geospatial_lat_min": self.lat_bounds.min().item(),
