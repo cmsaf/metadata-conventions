@@ -202,6 +202,7 @@ class DataTreeMaker:
             "time_coverage_resolution": "P1D",
             "time_coverage_start": self.time_bounds.min().dt.strftime(isoformat).item(),
             "title": "CM SAF GEoRing DAtaset (GERDA)",
+            "variable_id": "/clouds/cfc,/radiation/sis",
             "CMSAF_processor": "gerda-1.0.0",
             "CMSAF_repeat_cylces": "METEOSAT-11=96, GOES-15=8, GOES-16=96, Himawari-8=144",
         }
@@ -266,7 +267,6 @@ class Clouds:
             },
             attrs={
                 "title": "Clouds",
-                "variable_id": "cfc",
             },
         )
         self.mask.mask_timestamps(ds, {"cfc": np.nan, "nobs": 0})
@@ -391,7 +391,6 @@ class Radiation:
             },
             attrs={
                 "title": "Radiation",
-                "variable_id": "sis",
             },
         )
         self.mask.mask_timestamps(ds, {"sis": np.nan})
