@@ -191,6 +191,7 @@ variables:
     float precipitation(time, lat, lon) ;
             string precipitation:grid_mapping = "latlon_grid" ;
     double latlon_grid ;
+            latlon_grid:long_name = "Regular lat-lon grid" ;
             latlon_grid:inverse_flattening = 298.257223563 ;
             latlon_grid:reference_ellipsoid_name = "WGS 84" ;
             latlon_grid:_FillValue = NaN ;
@@ -221,6 +222,7 @@ variables:
     byte rain_mask(time, y, x) ;
             string rain_mask:grid_mapping = "geostationary_grid" ;
     double geostationary_grid ;
+        geostationary_grid:long_name = "Geostationary grid" ;
         geostationary_grid:crs_wkt = "PROJCRS[\"unknown\",BASEGEOGCRS[\"unknown\",DATUM[\"unknown\",ELLIPSOID[\"unknown\",6378169,295.488065897014,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]],PRIMEM[\"Greenwich\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8901]]],CONVERSION[\"unknown\",METHOD[\"Geostationary Satellite (Sweep Y)\"],PARAMETER[\"Longitude of natural origin\",0,ANGLEUNIT[\"degree\",0.0174532925199433],ID[\"EPSG\",8802]],PARAMETER[\"Satellite Height\",35785831,LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]],PARAMETER[\"False easting\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8806]],PARAMETER[\"False northing\",0,LENGTHUNIT[\"metre\",1],ID[\"EPSG\",8807]]],CS[Cartesian,2],AXIS[\"(E)\",east,ORDER[1],LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]],AXIS[\"(N)\",north,ORDER[2],LENGTHUNIT[\"metre\",1,ID[\"EPSG\",9001]]]]" ;
         geostationary_grid:semi_major_axis = 6378169. ;
         geostationary_grid:semi_minor_axis = 6356583.8 ;
