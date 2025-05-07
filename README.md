@@ -1,12 +1,22 @@
 # CM SAF Metadata Conventions
 
-Metadata conventions for CM SAF products.
+Metadata conventions for CM SAF datasets.
 
-## Metadata Conventions Document
+## Catalog Conventions
 
-The metadata conventions document is located [here](conventions.md)
+Conventions for metadata stored in data catalogs, such as unique dataset ID, documentation or related datasets.
+They help making the dataset findable and re-usable.
 
-## Sample File
+👉 [Catalog conventions document](catalog_conventions.md)
+
+## File Conventions
+
+Conventions for metadata included in each file, such as units, coordinates etc. They help understanding and working
+with the data.
+
+👉 [File conventions document](conventions.md)
+
+### Sample File
 
 There's a sample file available for
 [download](https://public.cmsaf.dwd.de/data/perm/metadata_standard/TSTdm20200101000000120IMPGS01GL.nc), 
@@ -21,7 +31,7 @@ Proper dimension inheritance is possible though, for example using other
 libraries like netCDF4.
 
 
-## Checking Metadata Compliance
+### Checking Metadata Compliance
 
 There are two tools for checking metadata compliance of your products:
 
