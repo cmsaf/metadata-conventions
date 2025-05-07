@@ -9,6 +9,7 @@ Major:
 - Added lineage attribute
 - Updated conventions/vocabulary versions
 - Updated license
+- Added timezone to time units
 - Changed compression to float + significant_digits + zlib
 
 Minor:
@@ -19,9 +20,9 @@ Minor:
 """
 
 import datetime as dt
-import json
 
 import numpy as np
+import pyproj
 import xarray as xr
 from dateutil.rrule import DAILY, rrule
 from scipy.ndimage import rotate
@@ -83,7 +84,7 @@ class DataTreeMaker:
             attrs={
                 "axis": "X",
                 "bounds": "lon_bounds",
-                "long_name": "Longitude",
+                "long_name": "longitude",
                 "standard_name": "longitude",
                 "units": "degrees_east",
             },
@@ -106,7 +107,7 @@ class DataTreeMaker:
             attrs={
                 "axis": "Y",
                 "bounds": "lat_bounds",
-                "long_name": "Latitude",
+                "long_name": "latitude",
                 "standard_name": "latitude",
                 "units": "degrees_north",
             },
@@ -120,20 +121,25 @@ class DataTreeMaker:
             lat_bounds, dims=("lat", "bounds"), attrs={"long_name": "Latitude bounds"}
         )
 
+    def get_grid_mapping(self):
+        crs = pyproj.CRS.from_epsg(4326)
+        attrs = crs.to_cf()
+        attrs["long_name"] = "Regular lat-lon grid"
+        return xr.DataArray(attrs=attrs)
+
     def get_data_tree(self):
         # Note: It would be nice to create coordinates only in the root group. However,
         # xarray re-defines dimensions in each group which crashes tools like
         # ncview. See https://github.com/pydata/xarray/issues/10241.
         # In the meantime, repeat coordinates in each group.
         coords = self.get_coords()
-        tree = xr.DataTree.from_dict(
+        return xr.DataTree.from_dict(
             {
                 "/": xr.Dataset(attrs=self.get_global_attrs()),
                 "/clouds": xr.merge([self.clouds.get_dataset(), coords]),
                 "/radiation": xr.merge([self.radiation.get_dataset(), coords]),
             },
         )
-        return tree
 
     def get_coords(self):
         return xr.Dataset(
@@ -142,6 +148,7 @@ class DataTreeMaker:
                 "lon_bounds": self.lon_bounds,
                 "lat_bounds": self.lat_bounds,
                 "record_status": self.rec_status.get_record_status(),
+                "latlon_grid": self.get_grid_mapping(),
             },
             coords={
                 "time": self.time,
@@ -152,17 +159,12 @@ class DataTreeMaker:
 
     def get_global_attrs(self):
         isoformat = "%Y-%m-%dT%H:%M:%SZ"
-        lineage = {
-            "MSG": "https://user.eumetsat.int/catalogue/EO:EUM:DAT:MSG:HRSEVIRI",
-            "GOES-I/N": "DOI:10.25921/Z9JQ-K976",
-            "GOES-R": "DOI:10.7289/V5BV7DSR",
-            "Himawari-8/9": "https://www.data.jma.go.jp/mscweb/en/himawari89/space_segment/sample_hisd.html",
-        }
+        lineage = "prov:wasDerivedFrom <https://user.eumetsat.int/catalogue/EO:EUM:DAT:MSG:HRSEVIRI>, <https://doi.org/10.24381/cds.bd0915c6>;"
         return {
-            "Conventions": "CF-1.12, ACDD-1.3",
+            "Conventions": "CF-1.12,ACDD-1.3",
             "creator_email": "contact.cmsaf@dwd.de",
             "creator_name": "DE/DWD",
-            "creator_url": "http://www.cmsaf.eu/",
+            "creator_url": "https://cm-saf.eumetsat.int/",
             "date_created": dt.datetime.now().strftime(isoformat),
             "geospatial_lat_max": self.lat_bounds.max().item(),
             "geospatial_lat_min": self.lat_bounds.min().item(),
@@ -173,34 +175,34 @@ class DataTreeMaker:
             "geospatial_lon_resolution": "1 degree",
             "geospatial_lon_units": "degrees_east",
             "id": "DOI:10.5676/EUM_SAF_CM/GERDA/V001",
-            "instrument": "SEVIRI > Spinning Enhanced Visible and Infrared Imager, "
-            "GOES-15 Imager > Geostationary Operational Environmental Satellite 15-Imager, "
-            "ABI > Advanced Baseline Imager, "
+            "instrument": "SEVIRI > Spinning Enhanced Visible and Infrared Imager,"
+            "GOES-15 Imager > Geostationary Operational Environmental Satellite 15-Imager,"
+            "ABI > Advanced Baseline Imager,"
             "AHI > Advanced Himawari Imager",
             "instrument_vocabulary": "GCMD Instruments, Version 21.0",
             "institution": "EUMETSAT/CMSAF",
-            "keywords": "CLOUD PROPERTIES > CLOUD FRACTION, ATMOSPHERIC RADIATION > SUNSHINE",
+            "keywords": "CLOUD PROPERTIES > CLOUD FRACTION,ATMOSPHERIC RADIATION > INCOMING SOLAR RADIATION",
             "keywords_vocabulary": "GCMD Science Keywords, Version 21.0",
             "license": "https://creativecommons.org/licenses/by/4.0/",
-            "lineage": json.dumps(lineage),
-            "platform": "METEOSAT > METEOSAT-11, "
-            "GOES > GOES-15, "
-            "GOES > GOES-16, "
-            "Himawari > Himawari-8",
+            "lineage": lineage,
+            "platform": "Meteosat > METEOSAT-11,GOES-15 > Geostationary Operational Environmental Satellite 15,GOES-16 > Geostationary Operational Environmental Satellite 16,Himawari > Himawari-8",
             "platform_vocabulary": "GCMD Platforms, Version 21.0",
             "product_version": "1.0",
             "project": "Satellite Application Facility on Climate Monitoring (CM SAF)",
-            "references": "http://dx.doi.org/10.5676/EUM_SAF_CM/GERDA/V001",
+            "provider_vocabulary": "GCMD Providers, Version 21.0",
+            "references": "https://doi.org/10.5676/EUM_SAF_CM/GERDA/V001",
             "source": "satellite",
             "standard_name_vocabulary": "Standard Name Table (v90, 20 March 2025)",
             "summary": "The CM SAF GEoRing DAtaset (GERDA) provides atmospheric "
             "parameters derived from geostationary satellites. "
             "It is a climate data record covering the time period 2002-2024. "
             "Use cases include climate monitoring, climate model evaluation etc.",
+            "time_coverage_duration": "P1M",
             "time_coverage_end": self.time_bounds.max().dt.strftime(isoformat).item(),
             "time_coverage_resolution": "P1D",
             "time_coverage_start": self.time_bounds.min().dt.strftime(isoformat).item(),
             "title": "CM SAF GEoRing DAtaset (GERDA)",
+            "variable_id": "/clouds/cfc,/radiation/sis",
             "CMSAF_processor": "gerda-1.0.0",
             "CMSAF_repeat_cylces": "METEOSAT-11=96, GOES-15=8, GOES-16=96, Himawari-8=144",
         }
@@ -259,16 +261,15 @@ class Clouds:
     def get_dataset(self):
         ds = xr.Dataset(
             {
-                "cfc_dm": self._get_cfc(),
+                "cfc": self._get_cfc(),
                 "nobs": self._get_nobs(),
                 "quality": self._get_quality(),
             },
             attrs={
                 "title": "Clouds",
-                "variable_id": "cfc_dm",
             },
         )
-        self.mask.mask_timestamps(ds, {"cfc_dm": np.nan, "nobs": 0})
+        self.mask.mask_timestamps(ds, {"cfc": np.nan, "nobs": 0})
         return ds
 
     def _get_cfc(self):
@@ -286,6 +287,7 @@ class Clouds:
                 "long_name": "Daily Mean Cloud Fraction",
                 "standard_name": "cloud_area_fraction",
                 "units": "%",
+                "grid_mapping": "latlon_grid",
             },
         )
         return cfc.where((cfc < 10) | (cfc > 20))
@@ -317,6 +319,7 @@ class Clouds:
                 "long_name": "Number of Observations",
                 "standard_name": "number_of_observations",
                 "units": "1",
+                "grid_mapping": "latlon_grid",
             },
         )
 
@@ -337,6 +340,7 @@ class Clouds:
                 "flag_meanings": "good medium bad",
                 "flag_values": np.array([0, 1, 2], qual.dtype),
                 "long_name": "Quality",
+                "grid_mapping": "latlon_grid",
             },
         )
 
@@ -348,7 +352,7 @@ class Radiation:
         self.lat = lat
         self.mask = mask
 
-    def get_sdu(self):
+    def get_sis(self):
         heart_extent = 1.2
         ntimes, rows, cols = self.time.size, self.lat.size, self.lon.size
 
@@ -372,23 +376,24 @@ class Radiation:
             hearts,
             dims=("time", "lat", "lon"),
             attrs={
-                "long_name": "Sunshine Duration",
-                "standard_name": "duration_of_sunshine",
-                "units": "s",
+                "long_name": "Daily mean Surface Downwelling Shortwave Radiation",
+                "standard_name": "surface_downwelling_shortwave_flux_in_air",
+                "units": "W m-2",
+                "cell_methods": "time: area: mean (interval: 15 minutes interval: 3 km)",
+                "grid_mapping": "latlon_grid",
             },
         )
 
     def get_dataset(self):
         ds = xr.Dataset(
             {
-                "sdu": self.get_sdu(),
+                "sis": self.get_sis(),
             },
             attrs={
-                "title": "Clouds",
-                "variable_id": "sdu",
+                "title": "Radiation",
             },
         )
-        self.mask.mask_timestamps(ds, {"sdu": np.nan})
+        self.mask.mask_timestamps(ds, {"sis": np.nan})
         return ds
 
 
@@ -397,7 +402,7 @@ class DataTreeWriter:
         common_enc = {
             "time": {
                 "dtype": "float64",
-                "units": "days since 2000-01-01 00:00:00",
+                "units": "days since 2000-01-01T00:00:00Z",
                 "calendar": "standard",
                 "_FillValue": None,
             },
@@ -427,7 +432,7 @@ class DataTreeWriter:
         }
         group_enc = {
             "/clouds": {
-                "cfc_dm": {
+                "cfc": {
                     # Assuming CFC has an absolute physical precision of 0.01
                     # (independent of the CFC value), quantize data with two
                     # significant digits to improve compression.
@@ -439,7 +444,7 @@ class DataTreeWriter:
                 "quality": {"dtype": "uint8", "zlib": True},
             },
             "/radiation": {
-                "sdu": {
+                "sis": {
                     # BitGroom quantization only makes sense if all data values
                     # are in the same order of magnitude ([0, 1] here).
                     "dtype": "float32",
@@ -472,4 +477,4 @@ if __name__ == "__main__":
     )
     writer = DataTreeWriter()
     tree = maker.get_data_tree()
-    writer.write(tree, "test.nc")
+    writer.write(tree, "TSTdm20200101000000120IMPGS01GL.nc")
