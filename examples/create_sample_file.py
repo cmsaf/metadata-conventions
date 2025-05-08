@@ -24,15 +24,17 @@ import datetime as dt
 import numpy as np
 import pyproj
 import xarray as xr
-from dateutil.rrule import DAILY, rrule
+from dateutil.rrule import DAILY, HOURLY, rrule
 from scipy.ndimage import rotate
 
 
 class DataTreeMaker:
     def __init__(
         self,
+        datasets,
         tstart,
         tend,
+        freq,
         lon_min,
         lon_max,
         lat_min,
@@ -41,20 +43,23 @@ class DataTreeMaker:
         void_timestamps,
     ):
         self.grid_resol = grid_resol
-        self.time = self.get_time(tstart, tend)
+        self.freq = freq
+        self.time = self.get_time(tstart, tend, freq)
         self.lon = self.get_lon(lon_min, lon_max, grid_resol)
         self.lat = self.get_lat(lat_min, lat_max, grid_resol)
         self.time_bounds = self.get_time_bounds()
         self.lon_bounds = self.get_lon_bounds()
         self.lat_bounds = self.get_lat_bounds()
         mask = Mask(void_timestamps)
-        self.clouds = Clouds(self.time, self.lon, self.lat, mask)
-        self.radiation = Radiation(self.time, self.lon, self.lat, mask)
+        self.datasets = {
+            name: cls(self.time, self.lon, self.lat, mask)
+            for name, cls in datasets.items()
+        }
         self.rec_status = RecordStatus(self.time, void_timestamps)
 
-    def get_time(self, tstart, tend):
+    def get_time(self, tstart, tend, freq):
         time = np.array(
-            list(rrule(dtstart=tstart, until=tend, freq=DAILY)), dtype="datetime64[ms]"
+            list(rrule(dtstart=tstart, until=tend, freq=freq)), dtype="datetime64[ms]"
         )
         return xr.DataArray(
             time,
@@ -68,8 +73,9 @@ class DataTreeMaker:
         )
 
     def get_time_bounds(self):
+        freq = {DAILY: "D", HOURLY: "h"}
         time_bounds = self._get_bounds(
-            self.time.values, resol=np.timedelta64(1, "D"), align="left"
+            self.time.values, freq=np.timedelta64(1, freq[self.freq]), align="left"
         )
         return xr.DataArray(time_bounds, dims=("time", "bounds"))
 
@@ -127,13 +133,12 @@ class DataTreeMaker:
         # ncview. See https://github.com/pydata/xarray/issues/10241.
         # In the meantime, repeat coordinates in each group.
         coords = self.get_coords()
-        return xr.DataTree.from_dict(
-            {
-                "/": xr.Dataset(attrs=self.get_global_attrs()),
-                "/clouds": xr.merge([self.clouds.get_dataset(), coords]),
-                "/radiation": xr.merge([self.radiation.get_dataset(), coords]),
-            },
-        )
+        tree = {
+            f"/{name}": xr.merge([ds.get_dataset(), coords])
+            for name, ds in self.datasets.items()
+        }
+        tree["/"] = xr.Dataset(attrs=self.get_global_attrs())
+        return xr.DataTree.from_dict(tree)
 
     def get_coords(self):
         return xr.Dataset(
@@ -154,6 +159,7 @@ class DataTreeMaker:
     def get_global_attrs(self):
         isoformat = "%Y-%m-%dT%H:%M:%SZ"
         lineage = "prov:wasDerivedFrom <https://user.eumetsat.int/catalogue/EO:EUM:DAT:MSG:HRSEVIRI>, <https://doi.org/10.24381/cds.bd0915c6>;"
+        time_cov = self._get_time_cov()
         return {
             "Conventions": "CF-1.12,ACDD-1.3",
             "creator_email": "contact.cmsaf@dwd.de",
@@ -191,9 +197,9 @@ class DataTreeMaker:
             "parameters derived from geostationary satellites. "
             "It is a climate data record covering the time period 2002-2024. "
             "Use cases include climate monitoring, climate model evaluation etc.",
-            "time_coverage_duration": "P1M",
+            "time_coverage_duration": time_cov["duration"],
             "time_coverage_end": self.time_bounds.max().dt.strftime(isoformat).item(),
-            "time_coverage_resolution": "P1D",
+            "time_coverage_resolution": time_cov["resolution"],
             "time_coverage_start": self.time_bounds.min().dt.strftime(isoformat).item(),
             "title": "CM SAF GEoRing DAtaset (GERDA)",
             "variable_id": "/clouds/cfc,/radiation/sis",
@@ -201,14 +207,21 @@ class DataTreeMaker:
             "CMSAF_repeat_cylces": "METEOSAT-11=96, GOES-15=8, GOES-16=96, Himawari-8=144",
         }
 
-    def _get_bounds(self, coords, resol, align):
+    def _get_bounds(self, coords, freq, align):
         if align == "left":
-            bounds = [[c, c + resol] for c in coords]
+            bounds = [[c, c + freq] for c in coords]
         elif align == "center":
-            bounds = [[c - 0.5 * resol, c + 0.5 * resol] for c in coords]
+            bounds = [[c - 0.5 * freq, c + 0.5 * freq] for c in coords]
         else:
             raise NotImplementedError
         return np.array(bounds)
+
+    def _get_time_cov(self):
+        time_cov = {
+            HOURLY: {"duration": "P1D", "resolution": "P1H"},
+            DAILY: {"duration": "P1D", "resolution": "P1D"},
+        }
+        return time_cov[self.freq]
 
 
 class RecordStatus:
@@ -237,6 +250,10 @@ class Mask:
         self.void_timestamps = void_timestamps
 
     def mask_timestamps(self, ds, vars_to_mask):
+        if self.void_timestamps:
+            self._mask(ds, vars_to_mask)
+
+    def _mask(self, ds, vars_to_mask):
         time = ds["time"]
         time_to_mask = time[self.void_timestamps]
         for var_name, fill_value in vars_to_mask.items():
@@ -272,19 +289,30 @@ class Clouds:
             lon_term = np.sin(t / 5.0 * np.deg2rad(self.mlon)) ** 2
             lat_term = np.cos(t / 10.0 * np.deg2rad(self.mlat)) ** 2
             cfc[t, :, :] = 100 * lon_term * lat_term
+
         cfc = xr.DataArray(
-            cfc,
-            dims=("time", "lat", "lon"),
-            attrs={
-                "ancillary_variables": "nobs quality",
-                "cell_methods": "time: area: mean (interval: 15 minutes interval: 3 km)",
-                "long_name": "Daily Mean Cloud Fraction",
-                "standard_name": "cloud_area_fraction",
-                "units": "%",
-                "grid_mapping": "latlon_grid",
-            },
+            cfc, dims=("time", "lat", "lon"), attrs=self._get_cfc_attrs()
         )
         return cfc.where((cfc < 10) | (cfc > 20))
+
+    def _get_cfc_attrs(self):
+        attrs = {
+            "ancillary_variables": "nobs quality",
+            "long_name": "Daily Mean Cloud Fraction",
+            "standard_name": "cloud_area_fraction",
+            "units": "%",
+            "grid_mapping": "latlon_grid",
+        }
+        cell_methods = self._get_cell_methods()
+        if cell_methods:
+            attrs["cell_methods"] = cell_methods["cfc"]
+        return attrs
+
+    def _get_cell_methods(self):
+        raise NotImplementedError
+
+    def _is_daily_mean(self):
+        return len(self.time) == 1
 
     def _get_nobs(self):
         lon_min = self.lon.values.min()
@@ -308,14 +336,20 @@ class Clouds:
         return xr.DataArray(
             nobs,
             dims=("time", "lat", "lon"),
-            attrs={
-                "cell_methods": "time: area: sum (interval: 15 minutes interval: 3 km)",
-                "long_name": "Number of Observations",
-                "standard_name": "number_of_observations",
-                "units": "1",
-                "grid_mapping": "latlon_grid",
-            },
+            attrs=self._get_nobs_attrs(),
         )
+
+    def _get_nobs_attrs(self):
+        attrs = {
+            "long_name": "Number of Observations",
+            "standard_name": "number_of_observations",
+            "units": "1",
+            "grid_mapping": "latlon_grid",
+        }
+        cell_methods = self._get_cell_methods()
+        if cell_methods:
+            attrs["cell_methods"] = cell_methods["nobs"]
+        return attrs
 
     def _get_quality(self):
         lat = self.lat.values
@@ -337,6 +371,19 @@ class Clouds:
                 "grid_mapping": "latlon_grid",
             },
         )
+
+
+class DailyClouds(Clouds):
+    def _get_cell_methods(self):
+        return {
+            "cfc": "time: area: mean (interval: 60 minutes interval: 3 km)",
+            "nobs": "time: area: sum (interval: 60 minutes interval: 3 km)",
+        }
+
+
+class InstantaneousClouds(Clouds):
+    def _get_cell_methods(self):
+        return {}
 
 
 class Radiation:
@@ -367,16 +414,23 @@ class Radiation:
             hearts[i, :, :] = rotate(heart, angle=angle, reshape=False)
 
         return xr.DataArray(
-            hearts,
-            dims=("time", "lat", "lon"),
-            attrs={
-                "long_name": "Daily mean Surface Downwelling Shortwave Radiation",
-                "standard_name": "surface_downwelling_shortwave_flux_in_air",
-                "units": "W m-2",
-                "cell_methods": "time: area: mean (interval: 15 minutes interval: 3 km)",
-                "grid_mapping": "latlon_grid",
-            },
+            hearts, dims=("time", "lat", "lon"), attrs=self._get_attrs()
         )
+
+    def _get_attrs(self):
+        attrs = {
+            "long_name": "Daily mean Surface Downwelling Shortwave Radiation",
+            "standard_name": "surface_downwelling_shortwave_flux_in_air",
+            "units": "W m-2",
+            "grid_mapping": "latlon_grid",
+        }
+        cell_methods = self._get_cell_methods()
+        if cell_methods:
+            attrs["cell_methods"] = cell_methods["sis"]
+        return attrs
+
+    def _get_cell_methods(self):
+        raise NotImplementedError
 
     def get_dataset(self):
         ds = xr.Dataset(
@@ -389,6 +443,16 @@ class Radiation:
         )
         self.mask.mask_timestamps(ds, {"sis": np.nan})
         return ds
+
+
+class DailyRadiation(Radiation):
+    def _get_cell_methods(self):
+        return {"sis": "time: area: mean (interval: 60 minutes interval: 3 km)"}
+
+
+class InstantaneousRadiation(Radiation):
+    def _get_cell_methods(self):
+        return {}
 
 
 class DataTreeWriter:
@@ -458,10 +522,30 @@ class DataTreeWriter:
         data_tree.to_netcdf(filename, encoding=self.get_encoding())
 
 
-if __name__ == "__main__":
+def write_daily_mean():
     maker = DataTreeMaker(
+        datasets={"clouds": DailyClouds, "radiation": DailyRadiation},
         tstart=dt.datetime(2020, 1, 1),
-        tend=dt.datetime(2020, 1, 31),
+        tend=dt.datetime(2020, 1, 1),
+        freq=DAILY,
+        lon_min=-179.5,
+        lon_max=179.5,
+        lat_min=-89.5,
+        lat_max=89.5,
+        grid_resol=1.0,
+        void_timestamps=[],
+    )
+    writer = DataTreeWriter()
+    tree = maker.get_data_tree()
+    writer.write(tree, "TSTdm20200101000000120IMPGS01GL.nc")
+
+
+def write_instantaneous():
+    maker = DataTreeMaker(
+        datasets={"clouds": InstantaneousClouds, "radiation": InstantaneousRadiation},
+        tstart=dt.datetime(2020, 1, 1, 0),
+        tend=dt.datetime(2020, 1, 1, 23),
+        freq=HOURLY,
         lon_min=-179.5,
         lon_max=179.5,
         lat_min=-89.5,
@@ -471,4 +555,9 @@ if __name__ == "__main__":
     )
     writer = DataTreeWriter()
     tree = maker.get_data_tree()
-    writer.write(tree, "TSTdm20200101000000120IMPGS01GL.nc")
+    writer.write(tree, "TSTin20200101000000120IMPGS01GL.nc")
+
+
+if __name__ == "__main__":
+    write_daily_mean()
+    write_instantaneous()

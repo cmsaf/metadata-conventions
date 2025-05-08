@@ -19,13 +19,16 @@ with the data.
 
 👉 [File conventions document](file_conventions.md)
 
-### Sample File
+### Sample Files
 
-There's a sample file available for
-[download](https://public.cmsaf.dwd.de/data/perm/metadata_standard/TSTdm20200101000000120IMPGS01GL.nc), 
-created by [this python script](examples/create_sample_file.py). 
+There are two sample files available for download,
 
-Note: Although the file contains groups, coordinates are repeated in each group.
+- [Instantaneous](https://public.cmsaf.dwd.de/data/perm/metadata_standard/TSTin20200101000000120IMPGS01GL.nc): Multiple time steps, including some empty records.
+- [Daily Mean](https://public.cmsaf.dwd.de/data/perm/metadata_standard/TSTdm20200101000000120IMPGS01GL.nc): Single time step.
+
+They were created by this [python script](examples/create_sample_file.py).
+
+Note: Although the files contain groups, coordinates are repeated in each group.
 It would be nice to create coordinates only in the root group and inherit them
 in subgroups. However, xarray (our go-to Python library for working with
 netCDF data) currently re-defines dimensions in each group, which crashes other
