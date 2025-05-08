@@ -2,6 +2,9 @@
 
 Metadata conventions for CM SAF datasets.
 
+This is the current working draft for CDOP-4. The CDOP-3 version can be found
+[here](https://github.com/cmsaf/metadata-conventions/blob/e70865e02488be40663128f857b701319b22d6b8/README.md).
+
 ## Catalog Conventions
 
 Conventions for metadata stored in data catalogs, such as unique dataset ID, documentation or related datasets.
@@ -31,35 +34,78 @@ Proper dimension inheritance is possible though, for example using other
 libraries like netCDF4.
 
 
-### Checking Metadata Compliance
+## Compliance Checkers
 
-There are two tools for checking metadata compliance of your products:
+Collection of tools for checking metadata compliance of your products.
 
-1. [cf-checker](https://github.com/cedadev/cf-checker) for checking against CF conventions. 
+### CF Conventions
+
+Tools for checking compliance with CF conventions.
+
+#### CF Checker
+
+For checking compliance with CF conventions we usually recommend
+[cf-checker](https://github.com/cedadev/cf-checker).
+Example:
+
+```
+conda install -c conda-forge cfchecker
+cfchecks myfile.nc
+```
+
+However, the project seems inactive and there are some open issues. For example,
+[groups are not supported](https://github.com/cedadev/cf-checker/issues/73), yet.
+Workaround: flatten the file using
+[netcdf-flattener](https://gitlab.eumetsat.int/open-source/netcdf-flattener)
+and check the flattened file.
+```python
+import netCDF4
+import netcdf_flattener
+
+def flatten(input_file, output_file):
+   with netCDF4.Dataset(input_file) as input_ds:
+       with netCDF4.Dataset(output_file, mode="w") as output_ds:
+           netcdf_flattener.flatten(input_ds, output_ds)
+
+           # Remove attributes added by flattener which trigger
+           # cf-checker warnings
+           for attr in output_ds.ncattrs():
+               if attr.startswith("__flattener"):
+                   output_ds.delncattr(attr)
     
-   Note: The `cf-checker`
-   [doesn't support groups](https://github.com/cedadev/cf-checker/issues/73), yet.
-   Workaround: flatten the file using
-   [netcdf-flattener](https://gitlab.eumetsat.int/open-source/netcdf-flattener)
-   and check the flattened file.
-   ```python
-   import subprocess
-   import netCDF4
-   import netcdf_flattener
+if __name__ == "__main__":
+   flatten("input.nc", "flat.nc")
+```
 
-   def flatten(input_file, output_file):
-       with netCDF4.Dataset(input_file) as input_ds:
-           with netCDF4.Dataset(output_file, mode="w") as output_ds:
-               netcdf_flattener.flatten(input_ds, output_ds)
-   
-               # Remove attributes added by flattener which trigger
-               # cf-checker warnings
-               for attr in output_ds.ncattrs():
-                   if attr.startswith("__flattener"):
-                       output_ds.delncattr(attr)
-        
-   if __name__ == "__main__":
-       flatten("input.nc", "flat.nc")
-       subprocess.run(["cfchecks", "flat.nc"], check=True)
-   ```
-2. `cmsaf-checker` for checking against the CM SAF metadata standard. TODO: Example
+So if you run into issues with `cf-checker` you might want to check out the following
+alternatives.
+
+#### IOOS Compliance Checker
+
+The [IOOS Compliance Checker](https://github.com/ioos/compliance-checker) is pretty mature
+and the project is active. However, it doesn't support groups either. Example:
+
+```
+conda install -c conda-forge compliance-checker
+cchecker.py -t cf:1.8 -t acdd:1.3 myfile.nc
+```
+
+#### xrlint
+
+[xrlint](https://github.com/bcdev/xrlint) is a linter for xarray Datasets/DataTrees,
+but can also be used to check NetCDF files. The project is still young, but actively
+developed and groups are supported. Example:
+
+```
+conda install -c conda-forge xrlint
+xrlint --init
+xrlint myfile.nc
+```
+
+### CM SAF Metadata Conventions
+
+We provide a dedicated tool `cmsaf-checker` for checking against the CM SAF metadata
+conventions. TODO:
+- 
+- Add link to repo
+- Add Example

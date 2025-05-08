@@ -71,9 +71,7 @@ class DataTreeMaker:
         time_bounds = self._get_bounds(
             self.time.values, resol=np.timedelta64(1, "D"), align="left"
         )
-        return xr.DataArray(
-            time_bounds, dims=("time", "bounds"), attrs={"long_name": "Time bounds"}
-        )
+        return xr.DataArray(time_bounds, dims=("time", "bounds"))
 
     def get_lon(self, lon_min, lon_max, dlon):
         lon = np.round(np.arange(lon_min, lon_max + dlon, dlon, dtype="f8"), decimals=1)
@@ -94,9 +92,7 @@ class DataTreeMaker:
         lon_bounds = self._get_bounds(self.lon, self.grid_resol, align="center").astype(
             "float64"
         )
-        return xr.DataArray(
-            lon_bounds, dims=("lon", "bounds"), attrs={"long_name": "Longitude bounds"}
-        )
+        return xr.DataArray(lon_bounds, dims=("lon", "bounds"))
 
     def get_lat(self, lat_min, lat_max, dlat):
         lat = np.round(np.arange(lat_min, lat_max + dlat, dlat, dtype="f8"), decimals=1)
@@ -117,9 +113,7 @@ class DataTreeMaker:
         lat_bounds = self._get_bounds(self.lat, self.grid_resol, align="center").astype(
             "float64"
         )
-        return xr.DataArray(
-            lat_bounds, dims=("lat", "bounds"), attrs={"long_name": "Latitude bounds"}
-        )
+        return xr.DataArray(lat_bounds, dims=("lat", "bounds"))
 
     def get_grid_mapping(self):
         crs = pyproj.CRS.from_epsg(4326)
