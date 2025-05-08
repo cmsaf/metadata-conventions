@@ -106,6 +106,6 @@ xrlint myfile.nc
 
 We provide a dedicated tool `cmsaf-checker` for checking against the CM SAF metadata
 conventions. TODO:
-- 
+
 - Add link to repo
 - Add Example
