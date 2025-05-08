@@ -262,6 +262,8 @@ class Mask:
 
 
 class Clouds:
+    time_offset = 0
+
     def __init__(self, time, lon, lat, mask):
         self.time = time
         self.lon = lon
@@ -286,8 +288,9 @@ class Clouds:
     def _get_cfc(self):
         cfc = np.zeros((self.time.size, self.lat.size, self.lon.size), dtype="float64")
         for t in range(self.time.size):
-            lon_term = np.sin(t / 5.0 * np.deg2rad(self.mlon)) ** 2
-            lat_term = np.cos(t / 10.0 * np.deg2rad(self.mlat)) ** 2
+            t_ = t + self.time_offset
+            lon_term = np.sin(t_ / 5.0 * np.deg2rad(self.mlon)) ** 2
+            lat_term = np.cos(t_ / 10.0 * np.deg2rad(self.mlat)) ** 2
             cfc[t, :, :] = 100 * lon_term * lat_term
 
         cfc = xr.DataArray(
@@ -319,15 +322,16 @@ class Clouds:
         lon_max = self.lon.values.max()
         nobs = np.zeros((self.time.size, self.lat.size, self.lon.size), dtype="uint8")
         times = list(range(self.time.size))
-        tmax = max(times)
+        tmax = max(times) + self.time_offset
         for t in times:
+            t_ = t + self.time_offset
             nobs[t, :, :] = (
                 96
                 * np.sin(
-                    t
+                    t_
                     / 5.0
                     * np.deg2rad(
-                        self.mlon + (lon_max - lon_min) / 2.0 * t / float(tmax)
+                        self.mlon + (lon_max - lon_min) / 2.0 * t_ / float(tmax)
                     )
                     * np.deg2rad(self.mlat)
                 )
@@ -374,6 +378,8 @@ class Clouds:
 
 
 class DailyClouds(Clouds):
+    time_offset = 12
+
     def _get_cell_methods(self):
         return {
             "cfc": "time: area: mean (interval: 60 minutes interval: 3 km)",
