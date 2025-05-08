@@ -17,7 +17,7 @@ They help making the dataset findable and re-usable.
 Conventions for metadata included in each file, such as units, coordinates etc. They help understanding and working
 with the data.
 
-👉 [File conventions document](conventions.md)
+👉 [File conventions document](file_conventions.md)
 
 ### Sample File
 
