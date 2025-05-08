@@ -1,6 +1,6 @@
-# CM SAF Metadata Conventions
+# CM SAF Metadata Conventions for Data Files
 
-CM SAF Metadata Conventions, Version 3 (CDOP-4), May 2025.
+CM SAF Metadata Conventions for Data Files, Version 3 (CDOP-4), May 2025.
 
 ## Table of Contents
 
