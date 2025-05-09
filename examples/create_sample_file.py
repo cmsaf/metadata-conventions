@@ -218,7 +218,7 @@ class DataTreeMaker:
 
     def _get_time_cov(self):
         time_cov = {
-            HOURLY: {"duration": "P1D", "resolution": "P1H"},
+            HOURLY: {"duration": "P1D", "resolution": "PT1H"},
             DAILY: {"duration": "P1D", "resolution": "P1D"},
         }
         return time_cov[self.freq]
