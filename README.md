@@ -107,8 +107,10 @@ xrlint myfile.nc
 
 ### CM SAF Metadata Conventions
 
-We provide a dedicated tool `cmsaf-checker` for checking against the CM SAF metadata
-conventions. TODO:
+We provide a dedicated tool [cmsaf-checker](https://github.com/cmsaf/cmsaf-checker) for checking against the CM SAF
+metadata conventions.
 
-- Add link to repo
-- Add Example
+```
+pip install git+https://github.com/cmsaf/cmsaf-checker
+cmsaf-checker myfile.nc
+```
