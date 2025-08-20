@@ -13,10 +13,12 @@ Major:
 - Changed compression to float + significant_digits + zlib
 
 Minor:
+
 - Fixed timestamp format (added Z for UTC)
 - Fixed lat bounds attribute name (typo latg_name)
 - Renamed bnds -> bounds for better readability
 - Renamed processor attributes
+
 """
 
 import datetime as dt
@@ -128,16 +130,10 @@ class DataTreeMaker:
         return xr.DataArray(attrs=attrs)
 
     def get_data_tree(self):
-        # Note: It would be nice to create coordinates only in the root group. However,
-        # xarray re-defines dimensions in each group which crashes tools like
-        # ncview. See https://github.com/pydata/xarray/issues/10241.
-        # In the meantime, repeat coordinates in each group.
-        coords = self.get_coords()
-        tree = {
-            f"/{name}": xr.merge([ds.get_dataset(), coords])
-            for name, ds in self.datasets.items()
-        }
-        tree["/"] = xr.Dataset(attrs=self.get_global_attrs())
+        tree = {f"/{name}": ds.get_dataset() for name, ds in self.datasets.items()}
+        root = self.get_coords()
+        root.attrs = self.get_global_attrs()
+        tree["/"] = root
         return xr.DataTree.from_dict(tree)
 
     def get_coords(self):
@@ -204,7 +200,7 @@ class DataTreeMaker:
             "title": "CM SAF GEoRing DAtaset (GERDA)",
             "variable_id": "/clouds/cfc,/radiation/sis",
             "CMSAF_processor": "gerda-1.0.0",
-            "CMSAF_repeat_cylces": "METEOSAT-11=96, GOES-15=8, GOES-16=96, Himawari-8=144",
+            "CMSAF_repeat_cycles": "METEOSAT-11=96, GOES-15=8, GOES-16=96, Himawari-8=144",
         }
 
     def _get_bounds(self, coords, freq, align):
@@ -495,6 +491,7 @@ class DataTreeWriter:
             },
         }
         group_enc = {
+            "/": common_enc,
             "/clouds": {
                 "cfc": {
                     # Assuming CFC has an absolute physical precision of 0.01
@@ -518,14 +515,10 @@ class DataTreeWriter:
                 },
             },
         }
-
-        # Repeat common encoding for each group
-        for group_name in group_enc:
-            group_enc[group_name] |= common_enc
         return group_enc
 
     def write(self, data_tree, filename):
-        data_tree.to_netcdf(filename, encoding=self.get_encoding())
+        data_tree.to_netcdf(filename, encoding=self.get_encoding(), engine="netcdf4")
 
 
 def write_daily_mean():
