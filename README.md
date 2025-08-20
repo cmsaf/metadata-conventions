@@ -26,7 +26,7 @@ There are two sample files available for download,
 - [Instantaneous](https://public.cmsaf.dwd.de/data/perm/metadata_standard/TSTin20200101000000120IMPGS01GL.nc): Multiple time steps, including some empty records.
 - [Daily Mean](https://public.cmsaf.dwd.de/data/perm/metadata_standard/TSTdm20200101000000120IMPGS01GL.nc): Single time step.
 
-They were created by this [python script](examples/create_sample_file.py).
+They were created by this [python script](examples/create_sample_file.py), which requires `xarray>=2025.08.0`.
 
 ## Compliance Checkers
 
