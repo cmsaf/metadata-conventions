@@ -26,16 +26,7 @@ There are two sample files available for download,
 - [Instantaneous](https://public.cmsaf.dwd.de/data/perm/metadata_standard/TSTin20200101000000120IMPGS01GL.nc): Multiple time steps, including some empty records.
 - [Daily Mean](https://public.cmsaf.dwd.de/data/perm/metadata_standard/TSTdm20200101000000120IMPGS01GL.nc): Single time step.
 
-They were created by this [python script](examples/create_sample_file.py).
-
-Note: Although the files contain groups, coordinates are repeated in each group.
-It would be nice to create coordinates only in the root group and inherit them
-in subgroups. However, xarray (our go-to Python library for working with
-netCDF data) currently re-defines dimensions in each group, which crashes other
-tools like ncview. See https://github.com/pydata/xarray/issues/10241.
-Proper dimension inheritance is possible though, for example using other
-libraries like netCDF4.
-
+They were created by this [python script](examples/create_sample_file.py), which requires `xarray>=2025.08.0`.
 
 ## Compliance Checkers
 
