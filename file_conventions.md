@@ -136,7 +136,7 @@ Note that `interval` refers to the original resolution of the data, e.g. 15 minu
 | Averaging Strategy                                                    | Cell Methods                                                                         |
 |-----------------------------------------------------------------------|--------------------------------------------------------------------------------------|
 | Average SEVIRI observations in space and time simultaneously          | time: area: mean (interval: 15 minutes interval: 3km)                                |
-| Average on SEVIRI grid (x/y), then resample to regular grid (lat/lon) | time: mean (interval: 15 minutes) lat: lon: point (nearest-neighbour to grid center) |
+| Average on SEVIRI grid (x/y), then resample to regular grid (lat/lon) | time: mean (interval: 15 minutes) lat: lon: point (nearest-neighbour to cell center) |
 | Compute monthly mean from daily means on the same grid                | time: mean (interval: 1 day)                                                         |
 
 ## Coordinates
