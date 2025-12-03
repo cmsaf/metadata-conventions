@@ -121,7 +121,7 @@ Variables should be described with the following attributes:
 | add_offset, scale_factor               | Unpacking parameters                  |                                                                 | If applicable ([8.1. Packed Data](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.12/cf-conventions.html#packed-data))                                                                                |               |
 | ancillary_variables                    | Ancillary variables                   | nobs, quality                                                   | Use this to reference number of observations, quality, standard deviation etc. (if any, [3.4. Ancillary Data](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.12/cf-conventions.html#ancillary-data)) |               |
 | bounds                                 | Reference to corresponding bounds     | lat_bounds                                                      | Coordinate variables only ([7.1. Cell Boundaries](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.12/cf-conventions.html#cell-boundaries))                                                            |               |
-| cell_methods                           | Applied statistics                    | see table below                                                 | Aggregated variables only ([7.3: Cell Methods](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.12/cf-conventions.html#cell-methods))                                                                  |               |
+| cell_methods                           | Applied statistics                    | See table below                                                 | Aggregated variables only ([7.3: Cell Methods](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.12/cf-conventions.html#cell-methods))                                                                  |               |
 | flag_values, flag_masks, flag_meanings | Flag decoding instructions            | flag_values=[0, 1, 2], flag_meanings='good medium bad'          | Flag type variables only ([3.5. Flags](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.12/cf-conventions.html#flags))                                                                                 |               |
 | grid_mapping                           | Specifies coordinate reference system | See [Coordinate Reference System](#coordinate-reference-system) | Recommended, but not mandatory                                                                                                                                                                                       | New attribute |
 | long_name                              | Variable name written out             | Cloud Fraction                                                  | Exception: Bounds variables                                                                                                                                                                                          |               |
@@ -133,11 +133,11 @@ Variables should be described with the following attributes:
 
 Note that `interval` refers to the original resolution of the data, e.g. 15 minutes and 3km for SEVIRI.
 
-| Averaging Strategy                                                             | Cell Methods                                                     |
-|--------------------------------------------------------------------------------|------------------------------------------------------------------|
-| Average SEVIRI observations in space and time simultaneously                   | time: area: mean (interval 15 minutes interval 3km)              |
-| Average on SEVIRI grid (x/y), then resample to regular grid (lat/lon)          | time: mean (interval 15 minutes) x: y: point (nearest neighbour) |
-| Compute monthly mean from daily means on the same grid                         | time: mean (interval 1 day)
+| Averaging Strategy                                                    | Cell Methods                                                                         |
+|-----------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| Average SEVIRI observations in space and time simultaneously          | time: area: mean (interval: 15 minutes interval: 3km)                                |
+| Average on SEVIRI grid (x/y), then resample to regular grid (lat/lon) | time: mean (interval: 15 minutes) lat: lon: point (nearest-neighbour to grid center) |
+| Compute monthly mean from daily means on the same grid                | time: mean (interval: 1 day)                                                         |
 
 ## Coordinates
 
