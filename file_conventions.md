@@ -131,13 +131,14 @@ Variables should be described with the following attributes:
 
 **Cell methods examples**
 
-Note that `interval` refers to the original resolution of the data, e.g. 15 minutes and 3km for SEVIRI.
+Here are some cell methods examples from CLAAS-4. Note that `interval` refers to the original resolution of the data, e.g. 15 minutes and 3km for SEVIRI.
 
-| Averaging Strategy                                                    | Cell Methods                                                                         |
-|-----------------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| Average SEVIRI observations in space and time simultaneously          | time: area: mean (interval: 15 minutes interval: 3km)                                |
-| Average on SEVIRI grid (x/y), then resample to regular grid (lat/lon) | time: mean (interval: 15 minutes) lat: lon: point (nearest-neighbour to cell center) |
-| Compute monthly mean from daily means on the same grid                | time: mean (interval: 1 day)                                                         |
+| Product                    | Averaging Strategy                                                                                                                          | Cell Methods                                                                                                                                                                                    |
+|----------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Daily mean                 | Average L2 products on native SEVIRI grid (y, x); resample to regular grid (lat/lon)                                                        | lat: lon: point (interval: 3km comment: nearest neighbour to cell center) time: mean (interval: 15 minutes)                                                                                     |
+| Monthly mean               | Average daily means on lat/lon grid                                                                                                         | lat: lon: point (interval: 3km comment: nearest neighbour to cell center) time: mean (interval: 15 minutes) time: mean (interval: 1 day)                                                        |
+| Monthly histogram          | Compute histogram of daily L2 products on native grid; map to 0.05° lat/lon grid; coarsen (sum) to 0.25° lat/lon grid; sum over days        | time: sum within hist2d_bins (interval: 15 minutes) lat: lon: point (interval: 3km comment: nearest neighbour to cell center) lat: lon: sum (interval: 0.05 degree) time: sum (interval: 1 day) |
+| Monthly mean diurnal cycle | Compute hourly means for each day; map to 0.05° lat/lon grid; coarsen (average) to 0.25° lat/lon grid; average all days                     | time: mean within days (interval: 15 minutes) lat: lon: point (interval: 3km comment: nearest neighbour to cell center) lat: lon: sum (interval: 0.05 degree) time: mean over days              |
 
 ## Coordinates
 
