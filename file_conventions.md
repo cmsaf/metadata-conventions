@@ -166,6 +166,10 @@ lon_bounds = [
 ]
 ```
 
+A special case is climatological means, such as monthly mean diurnal cycles, where
+time bounds are defined differently. See Example 7.11 in
+[7.4 Climatological Statistics](https://cfconventions.org/Data/cf-conventions/cf-conventions-1.13/cf-conventions.html#climatological-statistics)
+
 ### Grid Cell Alignment
 
 * Time coordinates represent the left boundary of the covered temporal interval.
